@@ -1,4 +1,7 @@
 # Starting the project
-import Tkinter*
+from tkinter import*
 
-wi
+window = Tk()
+
+
+window.mainloop()
