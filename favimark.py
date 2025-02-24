@@ -21,7 +21,24 @@ def toggle_password(entry, button):
 
 # Function to toggle between Login and Register
 def toggle_mode():
-    print('toggle from login to register')
+    global is_login
+    is_login = not is_login
+    title_label.config(text="LOG IN / SIGN IN" if is_login else "SIGN UP / REGISTER")
+    login_button.config(text="Login" if is_login else "Sign Up", command=login if is_login else register)
+    toggle_button.config(text="New to favimark? Register ..." if is_login else "Already Registered? Sign In ...")
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+    confirm_password_entry.delete(0,END)
+    
+    # Show/hide confirm password field dynamically
+    if is_login:
+        confirm_password_label.grid_remove()
+        confirm_password_frame.grid_remove()
+        frame.place(relwidth=0.6, relheight=0.7)  # Resize frame for login
+    else:
+        confirm_password_label.grid()
+        confirm_password_frame.grid()
+        frame.place(relwidth=0.6, relheight=0.8)  # Resize frame for signup
 
 def login():
     global current_user_id
@@ -53,7 +70,62 @@ def login():
         conn.close()
 
 def register():
-    print('register function')
+    # Retrieve data from entry fields
+    username = username_entry.get()
+    password = password_entry.get()
+    confirm_password = confirm_password_entry.get()
+
+    # Check if fields are empty
+    if username == "" or password == "" or confirm_password == "":
+        messagebox.showerror("Error", "Fields cannot be empty")
+        return
+
+    # Check if passwords match
+    if password != confirm_password:
+        messagebox.showerror("Error", "Passwords do not match")
+        return
+
+    # Generate a unique user ID
+    user_id = str(uuid.uuid4())[:8]
+
+    try:
+        # Connect to the database
+        conn = sqlite3.connect("favimark.db")
+        cursor = conn.cursor()
+
+        # Create the users and favourites tables if they don't exist
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                            user_id TEXT PRIMARY KEY, 
+                            username TEXT UNIQUE, 
+                            password TEXT)''')
+        
+        cursor.execute('''CREATE TABLE IF NOT EXISTS favourites (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT, 
+                    user_record_id INTEGER,  -- Unique record ID per user
+                    fav_name TEXT, 
+                    fav_type TEXT, 
+                    fav_description TEXT,
+                    FOREIGN KEY(user_id) REFERENCES users(user_id))''')
+
+        # Insert user data into the users table
+        cursor.execute("INSERT INTO users (user_id, username, password) VALUES (?, ?, ?)", 
+                       (user_id, username, password))
+
+        conn.commit()
+
+        messagebox.showinfo("Success", "Registration Successful! Please log in.")
+        toggle_mode() 
+
+    except sqlite3.IntegrityError:
+        # Catch integrity errors like duplicate usernames
+        messagebox.showerror("Error", "Username already exists")
+    except sqlite3.Error as e:
+        # Catch any other database-related errors
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+    finally:
+        # Ensure connection is closed
+        conn.close()
 
 # Create main window
 root = Tk()
