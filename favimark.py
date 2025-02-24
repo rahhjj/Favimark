@@ -9,14 +9,48 @@ current_user_id=None
 
 # Function to toggle password visibility
 def toggle_password(entry, button):
-    print('eye button toggle')
+    """Toggle password visibility and change eye button icon"""
+    if entry.cget('show') == '*':
+        entry.config(show='')  # Show password
+        button.config(image=eye_closed_icon)  # Change to closed eye
+        button.image = eye_closed_icon  # Prevent garbage collection
+    else:
+        entry.config(show='*')  # Hide password
+        button.config(image=eye_open_icon)  # Change to open eye
+        button.image = eye_open_icon  # Prevent garbage collection
 
 # Function to toggle between Login and Register
 def toggle_mode():
     print('toggle from login to register')
 
 def login():
-    print('login function')
+    global current_user_id
+    username = username_entry.get()
+    password = password_entry.get()
+
+    conn = sqlite3.connect("favimark.db")
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT user_id FROM users WHERE username=? AND password=?", (username, password))
+        user = cursor.fetchone()
+
+        if user:
+            current_user_id = user[0]
+            print(f"user {current_user_id} logged in") #Debugging Purposes
+            root.iconify() #imp
+            dashboard()
+        else:
+            response = messagebox.askyesno("User Not Found", "Username does not exist. Do you want to sign up?")
+            if response:  # If "Yes" is clicked
+                toggle_mode()  # Switch to the signup screen
+
+    except sqlite3.OperationalError as e:
+            response = messagebox.askyesno("User Not Found", "User does not exist. Do you want to sign up?")
+            if response:  # If "Yes" is clicked
+                toggle_mode()  # Switch to the signup screen
+    finally:
+        conn.close()
 
 def register():
     print('register function')
