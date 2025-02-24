@@ -652,7 +652,21 @@ def search_prompt():
     search_title_button.pack()
     
 def search_by_id():
-    print('searchbyid')
+    global searchbyid, idsearch_entry
+    searchbyid = Toplevel()
+    searchbyid.iconbitmap('search.ico')
+    searchbyid.title('Search by ID')
+    searchbyid.geometry('400x400')
+    idsearch_label = Label(searchbyid, text="Enter the ID of the record you want to search")
+    idsearch_label.pack(pady=30)
+    idsearch_entry = Entry(searchbyid,bd=5)
+    idsearch_entry.pack()
+    idsearch_button = Button(searchbyid, text="Search", command=idsearch,bg='grey', fg='white',bd=3)
+    idsearch_button.pack(pady=10)
+    search_what.iconify()
+    
+def idsearch():
+    print('database code')
 
 def search_by_type():
     print('searchbytype')
