@@ -544,8 +544,31 @@ def update():
     except sqlite3.Error as e:
         messagebox.showerror('Database Error', f"An error occurred: {e}")
 
+#   DELETE RECORDS IN FAVIMARK
+#->FIRST A PROMPT APPEARS SIMILAR TO EDIT PROMPT 
+#->UPON ENTERING ID OF RECORD WE WANT TO DELETE
+#->SUCCESSFULLY DELETED MESSAGE APPEARS
+#->THEN RECORD IS DELETED, WINDOW IS CLOSED AND DASHBOARD IS OVERWRITTEN 
+#->OVERWRITTEN DASHBOARD HAS THAT RECORD DELETED
+
 def delete_prompt():
-    print('delete items')
+    global delete_prompt_window,dele1
+    delete_prompt_window = Toplevel()
+    delete_prompt_window.title('Delete Prompt')
+    delete_prompt_window.geometry('350x350')
+    delete_prompt_window.iconbitmap('delete.ico')
+    del_text=Label(delete_prompt_window,text="Enter the ID of the records you want to delete.")
+    del_text.pack(pady=50)
+    dele1=Entry(delete_prompt_window,bd=5)
+    dele1.pack()
+    deletee=Button(delete_prompt_window,text=" DELETE ",command=delete_item, font=('Arial', 10), bg='red', fg='white',bd=5)
+    deletee.pack(pady=10)
+    
+#DELETE_ITEM FUNCTION IS USED TO DELETE THE RECORDS FROM THE DATABASE 
+#THEN DASHBOARD IS REFRESHED TO SHOW THAT THE RECORD HAS BEEN ERASED 
+
+def delete_item():
+    print('delete item from database')
         
 def search_prompt():
     print('search items')
