@@ -455,9 +455,94 @@ def edit_item():
 
     edit_add = Button(edit_window, text=" SAVE ", command=update, bg='grey', fg='white', bd=5)
     edit_add.pack(pady=20)
+
+    # ERROR HANDLING: Check if the record belongs to the logged-in user
+    try:
+        conn = sqlite3.connect('favimark.db')
+        c = conn.cursor()
+        oid = edite1.get()
+        
+        print(f"Editing record ID: {oid} for user_id: {current_user_id}") #debugging purposes  # Debugging Output
+        c.execute('SELECT * FROM favourites WHERE user_record_id=? AND user_id=?', (oid, current_user_id))
+        result = c.fetchall()
+        print(f"Record fetched: {result}")  # Debugging purposes
+        
+        if result:
+            for i in result:
+                neweditse1.insert(0, i[3])  # Insert fav_name
+                neweditse2.insert(0, i[4])  # Insert fav_type
+                neweditse3.insert(0, i[5])  # Insert fav_description
+        else:
+            messagebox.showerror('Error', 'Record not found or does not belong to the current user')
+            edit_window.destroy()
+            return
+    except sqlite3.Error as e:
+        messagebox.showerror('Error', e)
+    finally:
+        if conn:
+            conn.close()
+    
+#   AFTER EDITS ARE MADE AND SAVE BUTTON IS PRESSED THIS FUNCTION IS CALLED
+#->THIS FUNCTION USES SQL CODE TO MAKE CHANGES TO THE RESPECTIVE RECORD ACCORDINGLY
+#->AFTER WHICH THE MESSAGEBOX APPEARS WITH A SUCCESSFUL MESSAGE
     
 def update():
-    print('update code to database')
+    global neweditse1, neweditse2, neweditse3, edite1
+    
+    # Check if any field is empty
+    if not neweditse1.get() or not neweditse2.get() or not neweditse3.get():
+        messagebox.showwarning("Edited Val Error", "Please do not leave edited values empty!")
+        return  # Do not proceed if any field is empty
+    
+    try:
+        conn = sqlite3.connect('favimark.db')
+        c = conn.cursor()
+            
+            # Ensure a valid record ID is entered
+        if not edite1.get():
+                messagebox.showwarning("Edit Error", "No record ID entered!")
+                return  
+
+            # Ensure all fields are filled before updating
+        if not neweditse1.get() or not neweditse2.get() or not neweditse3.get():
+                messagebox.showwarning("Edit Error", "Please do not leave fields empty!")
+                return  
+
+        try:
+            conn = sqlite3.connect('favimark.db')
+            c = conn.cursor()
+            
+            # Convert the ID to an integer (ensuring it's valid)
+            record_id = int(edite1.get().strip())
+
+            # Perform the update only if the record exists
+            c.execute('''UPDATE favourites SET
+                        fav_name = ?,
+                        fav_type = ?,
+                        fav_description = ?
+                        WHERE user_record_id = ? AND user_id = ?''',
+                    (neweditse1.get(), neweditse2.get(), neweditse3.get(), record_id, current_user_id))
+            
+            conn.commit()
+
+            if c.rowcount > 0:  # Check if any row was actually updated
+                messagebox.showinfo('Success', 'Item updated successfully!')
+            else:
+                messagebox.showerror('Error', 'No matching record found!')
+
+            conn.close()
+
+            # Refresh the displayed items
+            display_items(roots)
+
+            # Close edit window
+            edit_window.destroy()
+            edit_prompt_window.destroy()
+
+        except ValueError:
+            messagebox.showerror('Input Error', 'Record ID must be a number!')
+    except sqlite3.Error as e:
+        messagebox.showerror('Database Error', f"An error occurred: {e}")
 
 def delete_prompt():
     print('delete items')
