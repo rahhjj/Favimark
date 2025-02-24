@@ -261,7 +261,50 @@ def dashboard():
 #->OVERWRITES NEWER DATA FROM DATABASE TO DASHBOARD
 
 def display_items(roots):
-    print('display items')
+    global text_widget  # Declare text_widget as global to access it across functions
+    
+    if text_widget is None or not text_widget.winfo_exists():
+        # Create frame and text widget with scrollbar as before
+        item_frame = Frame(roots)
+        item_frame.pack(fill=BOTH, expand=True)
+
+        text_widget = Text(item_frame, wrap=WORD, width=100, height=50)
+        text_widget.pack(side=LEFT, fill=BOTH, expand=True)
+
+        scrollbar = Scrollbar(item_frame, orient=VERTICAL, command=text_widget.yview)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        text_widget.config(yscrollcommand=scrollbar.set)
+    else:
+        # Clear previous content in text widget
+        text_widget.delete('1.0', END)
+
+    #user-specific data from the database
+    try:
+        conn = sqlite3.connect('favimark.db')
+        c = conn.cursor()
+        c.execute("SELECT user_record_id, fav_name, fav_type, fav_description FROM favourites WHERE user_id=?", (current_user_id,))
+        items = c.fetchall()
+        
+        print(f"fetching records for {current_user_id}") #Debugging purposes
+        print(f"Records fetched: {items}")  # Debugging Output
+
+        if not items:
+            text_widget.insert(END, "No items found for the current user.\n")
+        else:
+            # Format and display the items
+            item_text = "".join(f"{item[0]}. Name: {item[1]}\n   Type: {item[2]}\n   Description: {item[3]}\n\n" for i, item in enumerate(items))
+            text_widget.insert(END, item_text)
+
+        conn.close()
+
+    except sqlite3.Error as e:
+        print("Database Error:",e) #debugging purposes
+        # Handle database errors
+        text_widget.insert(END, f"Error fetching data: {e}\n")
+        conn.close()
+
+    # Automatically scroll to the bottom of the text widget
+    text_widget.yview(END)
         
 #   FUNCTION TO ADD ITEMS TO DATABASE
 #->CREATES A NEW WINDOW FOR ADDING ITEMS TO DATABASE
