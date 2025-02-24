@@ -568,7 +568,66 @@ def delete_prompt():
 #THEN DASHBOARD IS REFRESHED TO SHOW THAT THE RECORD HAS BEEN ERASED 
 
 def delete_item():
-    print('delete item from database')
+    global current_user_id  # Ensure 'current_user_id' is set globally when the user logs in
+    
+    # Check if any field is empty
+    if not dele1.get():
+        messagebox.showwarning("Records Input Error", "Please enter the ID of the record you want to delete.")
+        return  
+    
+    conn = sqlite3.connect('favimark.db')
+    c = conn.cursor()
+    oid = dele1.get()
+    
+    # Ask for confirmation before deleting
+    confirm = messagebox.askyesno("Confirm Deletion", f"Are you sure you want to delete record ID {oid}?")
+    if not confirm:
+        return  
+    
+    try:
+        # Step 1: Check if the record belongs to the logged-in user
+        c.execute('SELECT id FROM favourites WHERE user_record_id=? AND user_id=?', (oid, current_user_id))
+        record = c.fetchone()
+
+        if not record:
+            messagebox.showwarning("Deletion Error", f"Record ID {oid} does not belong to the current user.")
+            return  
+        
+        print(f"Deleting {oid} for user {current_user_id}")  # Debugging
+
+        # Step 2: Delete the record
+        c.execute('DELETE FROM favourites WHERE user_record_id=? AND user_id=?', (oid, current_user_id))
+        conn.commit()
+
+        # Step 3: Fetch and renumber remaining records for the user
+        c.execute("SELECT id FROM favourites WHERE user_id = ? ORDER BY user_record_id", (current_user_id,))
+        userrecordidrecords = c.fetchall()
+
+        # Step 4.1: Update user_record_id sequentially
+        for index, (record_id,) in enumerate(userrecordidrecords, start=1):
+            c.execute("UPDATE favourites SET user_record_id = ? WHERE id = ?", (index, record_id))
+
+        conn.commit()
+        
+        c.execute("SELECT id FROM favourites ORDER BY id")
+        idrecords = c.fetchall()
+        
+        # Step 4.2: Renumber the `id` values sequentially
+        for index, (old_id,) in enumerate(idrecords, start=1):
+            c.execute("UPDATE favourites SET id = ? WHERE id = ?", (index, old_id))
+
+        conn.commit()
+
+
+        messagebox.showinfo('Successful Deletion', 'Item deleted successfully')
+
+    except sqlite3.Error as e:
+        messagebox.showerror('Error', str(e))
+
+    finally:
+        conn.close()
+        display_items(roots)  # Refresh the list of items after deletion
+        delete_prompt_window.destroy()
         
 def search_prompt():
     print('search items')
