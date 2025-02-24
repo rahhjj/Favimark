@@ -292,8 +292,67 @@ def add_item():
     addnew=Button(additem,text=" ADD ",command=create, bg='grey', fg='white',bd=5)
     addnew.pack(pady=20)
     
+#   SUB-FUNCTION OF ADD ITEM FUNCTIONALITY
+#-> ADDS ITEMS TO THE DATABASE
+#-> THIS FUNCTION PROVIDES THE SUCCESFUL COMPLETION MESSAGE BOX.
+
 def create():
-    print('database code for add item')
+
+    # Check if any field is empty
+    if not newe1.get() or not newe2.get() or not newe3.get():
+        # If any field is empty, show a warning message
+        messagebox.showwarning("Input Error", "Please enter values for all fields.")
+        return  # Do not add the record if fields are empty
+
+    try:
+        # Connect to the database
+        conn = sqlite3.connect('favimark.db')
+        c = conn.cursor()
+
+        # Create table if it doesn't exist (already done earlier)
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS favourites(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                fav_name TEXT,
+                fav_type TEXT,
+                fav_description TEXT,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )
+        ''')
+
+        # Get the next record number for the user
+        c.execute("SELECT COALESCE(MAX(user_record_id), 0) + 1 FROM favourites WHERE user_id=?", (current_user_id,))
+        next_record_id = c.fetchone()[0]
+
+        # Insert new record with the user-specific record ID
+        c.execute('INSERT INTO favourites (user_id, user_record_id, fav_name, fav_type, fav_description) VALUES (?, ?, ?, ?, ?)',
+                (current_user_id, next_record_id, newe1.get(), newe2.get(), newe3.get()))
+
+
+        # Commit the transaction and close the connection
+        conn.commit()
+
+        # Success message
+        messagebox.showinfo('Success', 'Item created successfully')
+        
+        # Close the connection
+        conn.close()
+
+        # Refresh the displayed items to show the new item
+        display_items(roots)
+
+        # Clear the input fields
+        newe1.delete(0, END)
+        newe2.delete(0, END)
+        newe3.delete(0, END)
+
+        # Close the add item window
+        additem.destroy()
+
+    except sqlite3.Error as e:
+        # Handle any errors during database interaction
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
 
 def edit_prompt():
     print('edit items')
