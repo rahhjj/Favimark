@@ -397,6 +397,11 @@ def create():
         # Handle any errors during database interaction
         messagebox.showerror("Database Error", f"An error occurred: {e}")
 
+#   EDIT ITEMS IN FAVIMARK
+#-> THIS FUNCTION PROVIDES THE EDIT ITEM WINDOW PROMPT
+#-> ASKS THE ID OF THE RECORD WHICH THE USER WANTS TO EDIT
+#-> AFTER CLICKING ON PROCEED TO EDIT REDIRECTS TO ANOTHER WINDOW
+
 def edit_prompt():
     global edit_prompt_window,edite1
     edit_prompt_window = Toplevel()
@@ -409,9 +414,50 @@ def edit_prompt():
     edite1.pack()
     edit=Button(edit_prompt_window,text="PROCEED TO EDIT",command=edit_item,bg='grey', fg='white',bd=5)
     edit.pack(pady=10)
-    
+
+#AFTER CLICKING ON PROCEED TO EDIT, THIS FUNCTION IS CALLED
+#->SIMILAR TO ADD ITEMS FUNCTION
+#->DISPLAYS THE DATA OF THE ID NUMBER ENTERED BY THE USER WHICH CAN BE EDITED
+#->AFTER EDITING IT, SUCCESFUL COMPLETION MESSAGEBOX APPEARS
+#->AFTER WHICH THIS EDIT PROMPT APPEARS AGAIN.
+  
 def edit_item():
-    print('edit ites database code')
+    global neweditse1, neweditse2, neweditse3, edite1, edit_prompt_window, edit_window
+    
+    # Check if any field is empty
+    if not edite1.get():
+        messagebox.showwarning("Input Error", "Please enter ID of the record you want to edit.")
+        return  # Do not proceed if no ID is entered
+
+    # Open the edit window for the user
+    edit_window = Toplevel()
+    edit_window.title('favimark/EDIT_ITEMS')
+    edit_window.geometry('400x400')
+    edit_window.iconbitmap('edit.ico')
+
+    name_label = Label(edit_window, text="Edit your marked favourites")
+    name_label.pack(pady=10)
+
+    neweditse1 = Entry(edit_window, bd=5)
+    neweditse1.pack()
+
+    type_label = Label(edit_window, text="Edit the Type (Book/Movie/Anime/Manga/Manhua/Shows)")
+    type_label.pack(pady=10)
+
+    neweditse2 = Entry(edit_window, bd=5)
+    neweditse2.pack()
+
+    desc_label = Label(edit_window, text="Edit Review")
+    desc_label.pack(pady=10)
+
+    neweditse3 = Entry(edit_window, bd=5)
+    neweditse3.pack()
+
+    edit_add = Button(edit_window, text=" SAVE ", command=update, bg='grey', fg='white', bd=5)
+    edit_add.pack(pady=20)
+    
+def update():
+    print('update code to database')
 
 def delete_prompt():
     print('delete items')
