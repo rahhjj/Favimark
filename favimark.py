@@ -105,7 +105,50 @@ toggle_button.grid(row=9, column=0, columnspan=2, pady=10)
 #->ROOTS IS USED AS THE WINDOW HERE.
        
 def dashboard():
-    print('dashboard')
+    global roots  # Giving roots window a global scope to access it from other windows
+    roots = Toplevel(root)
+    roots.state('zoomed')
+    roots.title("favimark/Dashboard")
+
+    # Align everything at the top of the page
+    top_frame = Frame(roots, bg='white')
+    top_frame.pack(side=TOP, fill=BOTH, padx=1, pady=10, expand=True)
+
+    # UI for buttons which aligns CRUD buttons at the top of the page using top_frame
+    button_frame_crud = Frame(top_frame, bg='white')
+    button_frame_crud.pack(side=LEFT, fill=X)  # Use fill=X to stretch horizontally
+
+    # Use grid layout for buttons and align them to the left side
+    add_button = Button(button_frame_crud, text="ADD", command=add_item, font=('Arial', 12), bg='grey', fg='white', bd=3)
+    add_button.grid(row=0, column=0, padx=10, sticky='w')  # Align left
+
+    edit_button = Button(button_frame_crud, text="EDIT", command=edit_prompt, font=('Arial', 12), bg='grey', fg='white', bd=3)
+    edit_button.grid(row=0, column=1, padx=10, sticky='w')  # Align left
+
+    search_button = Button(button_frame_crud, text=" SEARCH ", command=search_prompt, font=('Arial', 12), bg='grey', fg='white', bd=3)
+    search_button.grid(row=0, column=2, padx=10, sticky='w')  # Align left
+
+    delete_button = Button(button_frame_crud, text="DELETE", command=delete_prompt, font=('Arial', 12), bg='grey', fg='white', bd=3)
+    delete_button.grid(row=0, column=3, padx=10, sticky='w')  # Align left
+
+    # UI for exit button
+    button_frame_exit = Frame(top_frame, bg='white')
+    button_frame_exit.pack(side=RIGHT, fill=X, padx=10)  # This frame is only for the exit button
+
+    # Load exit button image (exit.png should be in the same directory or specify the full path)
+    exit_image = Image.open('exit.png').resize((50, 50))  # Make sure exit.png is in the correct location
+    exit_icon = ImageTk.PhotoImage(exit_image)
+
+    # Create an Exit button with the image
+    exit_button = Button(button_frame_exit, image=exit_icon, command=logout, bd=0)
+    exit_button.image = exit_icon  # Keep a reference to the image to prevent garbage collection
+
+    # Grid the exit button in the far-right position
+    exit_button.grid(row=0, column=999, padx=10, sticky='e')  # column=999 will push it to the far-right
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+    # Display the items in the dashboard (assuming this function works as intended)
+    display_items(roots)
 
 #   FUNCTION TO DISPLAY ITEMS IN DASHBOARD
 #->CREATES AN INTERFACE TO DISPLAY ITEMS IN SHORT LISTS IF DOESNT EXIST
@@ -125,5 +168,13 @@ def delete_prompt():
         
 def search_prompt():
     print('search items')
+    
+def logout():
+    global current_user_id
+    exit=messagebox.askyesno('Logout_prompt','Do you want to logout?')
+    if exit:
+        current_user_id = None  # Reset current user
+        roots.destroy()  # Close the dashboard window
+        root.deiconify()
     
 mainloop()
