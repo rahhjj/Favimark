@@ -612,7 +612,7 @@ def delete_item():
         c.execute("SELECT id FROM favourites ORDER BY id")
         idrecords = c.fetchall()
         
-        # Step 4.2: Renumber the `id` values sequentially
+        # Step 4.2: Renumber the id values sequentially
         for index, (old_id,) in enumerate(idrecords, start=1):
             c.execute("UPDATE favourites SET id = ? WHERE id = ?", (index, old_id))
 
@@ -629,8 +629,33 @@ def delete_item():
         display_items(roots)  # Refresh the list of items after deletion
         delete_prompt_window.destroy()
         
+#SEARCH BUTTON'S FUNCTIONALITY
+#   SEARCH MARKED FAVOURITES IN FAVIMARK
+#->PROMPT WINDOW APPEARS
+#->TWO BUTTONS, SEARCH BY ID AND SEARCH BY TYPE
+#->SEARCH BY ID HAS ONE FUNCTION TO CARRY FUNCTIONALITY
+#->SEARCH BY TYPE HAS ONE FUNCTION TO CARRY FUNCTIONALITY
+
 def search_prompt():
-    print('search items')
+    global search_what
+    search_what=Toplevel()
+    search_what.title('Search Prompt')
+    search_what.geometry('350x350')
+    search_what.iconbitmap('search.ico')
+    search_id_label=Label(search_what,text="Click below to search by ID")
+    search_id_label.pack(pady=20)
+    search_id_button=Button(search_what,text="Search by ID",command=search_by_id,bg='grey', fg='white',bd=3)
+    search_id_button.pack()
+    search_title_label=Label(search_what,text="Click below to search by Type")
+    search_title_label.pack(pady=20)
+    search_title_button=Button(search_what,text="Search by Type",command=search_by_type,bg='grey', fg='white',bd=3)
+    search_title_button.pack()
+    
+def search_by_id():
+    print('searchbyid')
+
+def search_by_type():
+    print('searchbytype')
     
 def logout():
     global current_user_id
