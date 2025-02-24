@@ -650,10 +650,7 @@ def search_prompt():
     search_title_label.pack(pady=20)
     search_title_button=Button(search_what,text="Search by Type",command=search_by_type,bg='grey', fg='white',bd=3)
     search_title_button.pack()
-   
-#THIS IS THE SEARCH BY ID PROMPT WHERE USER ENTERS ID OF RECORD THEY WANT TO VIEW
-#THEN REDIRECTED TO ANOTHER WINDOW
- 
+    
 def search_by_id():
     global searchbyid, idsearch_entry
     searchbyid = Toplevel()
@@ -667,11 +664,7 @@ def search_by_id():
     idsearch_button = Button(searchbyid, text="Search", command=idsearch,bg='grey', fg='white',bd=3)
     idsearch_button.pack(pady=10)
     search_what.iconify()
-
-#THIS FUNCTION PROVIDES USER WITH ANOTHER WINDOW THAT RETRIEVES DATA FROM DATABASE
-#SQL IS USED TO RETRIEVE DATA AND DISPLAY IN THE NEW WINDOW
-#ONLY ONE RECORD IS SHOWN BECAUSE ONE RECORD HAS ONE ID, ID IS UNIQUE
-
+    
 def idsearch():
     # Ensure 'current_user_id' is set globally when the user logs in
     if not current_user_id:  # Make sure there is a logged-in user
@@ -727,17 +720,38 @@ def idsearch():
         searchbyid.iconify()
     except NameError:
         pass 
-
-#   UPON CLICKING EXIT BUTTON, THIS FUNCTION CALLED
-#->CLOSES THREE WINDOWS OF SEARCH
-
+    
 def idsearch_exit():
         idsearch_window.destroy()
         searchbyid.destroy()
         search_what.destroy()
 
+#SEARCH BY TYPE PROMPT
+#USER ENTERS THE TYPE OF ITEMS THEY WANT TO SEARCH FOR
+#FOR EXAMPLE: BOOK,MOVIE,ANIME,MANGA,MANHUA
+#->THEN THE TYPESEARCH FUNCTION IS CALLED
+#->WHICH USES SQL TO SEARCH ALL RECORDS WITH THAT TYPE
+    
 def search_by_type():
-    print('searchbytype')
+    global searchbytype, typesearch_entry
+    searchbytype = Toplevel()
+    searchbytype.iconbitmap('search.ico')
+    searchbytype.title('Search by Type')
+    searchbytype.geometry('400x400')
+    typesearch_label = Label(searchbytype, text="Enter the Type of the record you want to search")
+    typesearch_label.pack(pady=30)
+    typesearch_entry = Entry(searchbytype,bd=5)
+    typesearch_entry.pack()
+    typesearch_button = Button(searchbytype, text="Search", command=typesearch,bg='grey', fg='white',bd=3)
+    typesearch_button.pack(pady=10)
+    search_what.iconify()
+
+#IMPLEMENTATION OF SQL TO SEARCH ALL RECORDS WITH THE GIVEN TYPE
+#THEN MULTIPLE RECORDS ARE SHOWN BASED OFF OF HOW MANY RECORDS HAVE SAME TYPE
+#WINDOWS HAVE TO BE MANUALLY CLOSED, OR WE CAN PRESS A BUTTON BELOW THE PAGE TO QUIT.
+
+def typesearch():
+    print('database code')
     
 def logout():
     global current_user_id
