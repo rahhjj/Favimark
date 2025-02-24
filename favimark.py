@@ -751,7 +751,69 @@ def search_by_type():
 #WINDOWS HAVE TO BE MANUALLY CLOSED, OR WE CAN PRESS A BUTTON BELOW THE PAGE TO QUIT.
 
 def typesearch():
-    print('database code')
+    # Ensure 'current_user_id' is set globally when the user logs in
+    if not current_user_id:  # Make sure there is a logged-in user
+        messagebox.showwarning("Login Error", "No user is logged in!")
+        return
+
+    # Check if any field is empty
+    if not typesearch_entry.get():
+        messagebox.showwarning("Type Search Error", "Please enter the type of the record you want to search.")
+        return
+
+    global typesearch_window
+    type = typesearch_entry.get()
+
+    # Create a new window to display the search results
+    typesearch_window = Toplevel()
+    typesearch_window.title('Search Result')
+    typesearch_window.geometry('700x500')
+    typesearch_window.iconbitmap('search.ico')
+
+    result_label = Label(typesearch_window, text="Search Result")
+    result_label.pack(pady=10)
+    result_text = Text(typesearch_window)
+    result_text.pack(pady=10)
+
+    # Button to exit
+    exit_button = Button(typesearch_window, text="Exit", command=typesearch_exit, font=('Arial', 12), bg='red', fg='white', bd=3)
+    exit_button.pack(pady=10)
+
+    try:
+        # Retrieve the records by type for the current user
+        conn = sqlite3.connect('favimark.db')
+        c = conn.cursor()
+        c.execute('SELECT fav_name, fav_type, fav_description FROM favourites WHERE fav_type=? AND user_id=?', (type, current_user_id))
+        records = c.fetchall()
+        conn.close()
+
+        if records:
+            for i, record in enumerate(records, start=1):
+                item_name = record[0]         # Name field
+                item_type = record[1]         # Type field
+                item_description = record[2]  # Description field
+
+                result_text.insert(INSERT, f"{i}. Name: {item_name}\n\n---Type: {item_type}\n\n---Description: {item_description}\n\n")
+        else:
+            result_text.insert(INSERT, "No records found for this type.")
+        
+        result_text.config(state=DISABLED)
+    
+    except sqlite3.Error as e:
+        messagebox.showerror("Error", str(e))
+    
+    try:
+        searchbytype.iconify()
+    except NameError:
+        pass  
+
+#UPON CLICKING EXIT BUTTON, THIS FUNCTION CALLED
+#->CLOSES THREE WINDOWS OF SEARCH
+  
+def typesearch_exit():
+    searchbytype.destroy()
+    search_what.destroy()
+    typesearch_window.destroy()
     
 def logout():
     global current_user_id
