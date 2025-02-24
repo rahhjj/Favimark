@@ -650,7 +650,10 @@ def search_prompt():
     search_title_label.pack(pady=20)
     search_title_button=Button(search_what,text="Search by Type",command=search_by_type,bg='grey', fg='white',bd=3)
     search_title_button.pack()
-    
+   
+#THIS IS THE SEARCH BY ID PROMPT WHERE USER ENTERS ID OF RECORD THEY WANT TO VIEW
+#THEN REDIRECTED TO ANOTHER WINDOW
+ 
 def search_by_id():
     global searchbyid, idsearch_entry
     searchbyid = Toplevel()
@@ -664,9 +667,74 @@ def search_by_id():
     idsearch_button = Button(searchbyid, text="Search", command=idsearch,bg='grey', fg='white',bd=3)
     idsearch_button.pack(pady=10)
     search_what.iconify()
-    
+
+#THIS FUNCTION PROVIDES USER WITH ANOTHER WINDOW THAT RETRIEVES DATA FROM DATABASE
+#SQL IS USED TO RETRIEVE DATA AND DISPLAY IN THE NEW WINDOW
+#ONLY ONE RECORD IS SHOWN BECAUSE ONE RECORD HAS ONE ID, ID IS UNIQUE
+
 def idsearch():
-    print('database code')
+    # Ensure 'current_user_id' is set globally when the user logs in
+    if not current_user_id:  # Make sure there is a logged-in user
+        messagebox.showwarning("Login Error", "No user is logged in!")
+        return
+
+    # Check if ID search field is empty
+    if not idsearch_entry.get():
+        messagebox.showwarning("Search ID Error", "Please enter ID of the record you want to search.")
+        return  # Do not search if the ID is empty
+
+    global idsearch_window
+    id = idsearch_entry.get()
+
+    # Create a new window to display the search results
+    idsearch_window = Toplevel()
+    idsearch_window.title('Search Result')
+    idsearch_window.geometry('700x500')
+    idsearch_window.iconbitmap('search.ico')
+
+    result_label = Label(idsearch_window, text="Search Result")
+    result_label.pack(pady=10)
+
+    result_text = Text(idsearch_window)
+    result_text.pack(pady=10)
+
+    # Button to exit
+    exit_button = Button(idsearch_window, text="Exit", command=idsearch_exit, font=('Arial', 12), bg='red', fg='white', bd=3)
+    exit_button.pack(pady=10)
+
+    try:
+        # Retrieve the record by ID for the current user
+        conn = sqlite3.connect('favimark.db')
+        c = conn.cursor()
+        c.execute('SELECT fav_name, fav_type, fav_description FROM favourites WHERE user_record_id=? AND user_id=?', (id, current_user_id))
+        record = c.fetchone()
+        conn.close()
+
+        if record:
+            item_name = record[0]         # Name field
+            item_type = record[1]         # Type field
+            item_description = record[2]  # Description field
+
+            result_text.insert(INSERT, f"Name: {item_name}\n\n---Type: {item_type}\n\n---Description: {item_description}\n\n")
+        else:
+            result_text.insert(INSERT, "Record not found or it does not belong to the current user.")
+        
+        result_text.config(state=DISABLED)
+        
+    except sqlite3.Error as e:
+        messagebox.showerror("Error", str(e))
+    try:
+        searchbyid.iconify()
+    except NameError:
+        pass 
+
+#   UPON CLICKING EXIT BUTTON, THIS FUNCTION CALLED
+#->CLOSES THREE WINDOWS OF SEARCH
+
+def idsearch_exit():
+        idsearch_window.destroy()
+        searchbyid.destroy()
+        search_what.destroy()
 
 def search_by_type():
     print('searchbytype')
