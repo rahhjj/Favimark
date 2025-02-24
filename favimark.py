@@ -263,8 +263,37 @@ def dashboard():
 def display_items(roots):
     print('display items')
         
+#   FUNCTION TO ADD ITEMS TO DATABASE
+#->CREATES A NEW WINDOW FOR ADDING ITEMS TO DATABASE
+#->ASKS FOR ITEM NAME, TYPE AND DESCRIPTION
+#->ADDS ITEM TO DATABASE IF ALL FIELDS ARE FILLED
+#->IF ANY FIELD IS LEFT BLANK, A MESSAGE BOX APPEARS
+#->UPON COMPLETION, SUCCESSFUL ADDITION MESSAGE BOX APPEARS
+#->AFTER CLICKING OK ON IT, ADD WINDOW CLOSES AND DASHBOARD REDIRECTION
+        
 def add_item():
-    print('add items')
+    global newe1, newe2, newe3, additem
+    additem = Toplevel()
+    additem.geometry('400x400')
+    additem.iconbitmap('add.ico')
+    additem.title("favimark/ADD-ITEMS")
+    name_label=Label(additem,text="Mark your favourites",)
+    name_label.pack(pady=10)
+    newe1=Entry(additem,bd=5)
+    newe1.pack()
+    type_label=Label(additem,text="Type (Book/Movie/Anime/Manga/Manhua/Shows)")
+    type_label.pack(pady=10)
+    newe2=Entry(additem,bd=5)
+    newe2.pack()
+    desc_label=Label(additem,text="Review. eg:Good/Decent/Excellent")
+    desc_label.pack(pady=10)
+    newe3=Entry(additem,bd=5)
+    newe3.pack()
+    addnew=Button(additem,text=" ADD ",command=create, bg='grey', fg='white',bd=5)
+    addnew.pack(pady=20)
+    
+def create():
+    print('database code for add item')
 
 def edit_prompt():
     print('edit items')
